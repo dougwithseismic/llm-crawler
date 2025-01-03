@@ -58,6 +58,68 @@ This example shows a basic crawl of withseismic.com with common configuration op
 - Run 10 concurrent crawls
 - Send results to a test webhook
 
+## Playground Service
+
+Sometimes you'll be wishing that you could execute your own code in a similar way to the crawler - that's why the Playground service exists. It provides the same plugin environment and webhook capabilities but runs arbitrary code instead of crawling websites.
+
+### Quick Example
+
+```bash
+curl -X POST "http://localhost:3000/playground/jobs" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "input": "Hello, World!",
+  "plugins": ["example"],
+  "webhook": {
+    "url": "http://localhost:3000/test/webhook",
+    "on": ["completed"]
+  },
+  "async": true
+}'
+```
+
+The playground service offers:
+
+- Same plugin architecture as the crawler
+- Webhook notifications for job progress
+- Synchronous or asynchronous execution
+- Storage system for plugins to share state
+- Metrics collection and summarization
+
+Perfect for:
+
+- Running LLM chains with progress tracking
+- Processing data through multiple stages
+- Executing long-running tasks with webhooks
+- Testing and prototyping new plugins
+
+### Example Response
+
+```json
+{
+  "jobId": "job-uuid",
+  "status": "completed",
+  "result": {
+    "metrics": [{
+      "example": {
+        "processedAt": "2024-01-03T12:00:00.000Z",
+        "inputLength": 13,
+        "outputLength": 13,
+        "processingTimeMs": 50
+      }
+    }],
+    "summary": {
+      "example": {
+        "totalProcessed": 1,
+        "averageProcessingTime": 50,
+        "totalInputLength": 13,
+        "totalOutputLength": 13
+      }
+    }
+  }
+}
+```
+
 ## Architecture Overview
 
 ![GTM Crawler Architecture](docs/gtm-crawler-diagram.png)
@@ -75,6 +137,7 @@ The diagram above shows how the GTM Crawler processes requests:
 - [Installation](#installation)
 - [Tunnel Setup](#tunnel-setup)
 - [Quick Start](#quick-start)
+- [Playground Service](#playground-service)
 - [Using with n8n](#using-with-n8n)
 - [Using with Clay.com](#using-with-claycom)
 - [Webhook Integration](#webhook-integration)

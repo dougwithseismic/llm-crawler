@@ -14,8 +14,7 @@ This guide will help you set up and start using the GTM Crawler service.
 1. Clone the repository:
 
 ```bash
-git clone [repository-url]
-cd llm-crawler
+git clone https://github.com/dougwithseismic/gtm-crawler.git
 ```
 
 2. Install dependencies and set up the tunnel:

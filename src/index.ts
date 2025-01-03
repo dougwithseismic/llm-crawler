@@ -13,6 +13,7 @@ import healthRoutes from './routes/health';
 import linkedinRoutes from './routes/linkedin';
 import testRoutes from './routes/test';
 import { TunnelService } from './services/tunnel-service';
+import playgroundRouter from './routes/playground';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,6 +31,7 @@ app.use('/api', apiRoutes);
 app.use('/crawl', crawlRoutes);
 app.use('/linkedin', linkedinRoutes);
 app.use('/test', testRoutes);
+app.use('/playground', playgroundRouter);
 
 // Error handling
 app.use(errorHandler);

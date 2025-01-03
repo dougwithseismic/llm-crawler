@@ -14,6 +14,68 @@ With the right plugins (I'll build examples), you should be able to do BASICALLY
 
 Build custom plugins to do whatever you want, set up webhook notifications, and add seamless integration with Clay.com and n8n thanks to ngrok tunnels (your machine can communicate back and forth with internet services.)
 
+## Quick Example
+
+```bash
+curl -X POST "http://localhost:3000/crawl/withseismic.com" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "maxDepth": 3,
+  "maxPages": 100,
+  "maxRequestsPerMinute": 60,
+  "maxConcurrency": 10,
+  "timeout": {
+    "page": 30000,
+    "request": 10000
+  },
+  "userAgent": "MyBot/1.0",
+  "respectRobotsTxt": false,
+  "sitemapUrl": null,
+  "webhook": {
+    "url": "http://localhost:3000/test/webhook"
+  }
+}'
+```
+
+Or using HTTPie (recommended for development):
+
+```bash
+http POST localhost:3000/crawl/withseismic.com \
+  maxDepth:=3 \
+  maxPages:=100 \
+  maxRequestsPerMinute:=60 \
+  maxConcurrency:=10 \
+  timeout:='{"page": 30000, "request": 10000}' \
+  userAgent="MyBot/1.0" \
+  respectRobotsTxt:=false \
+  sitemapUrl=null \
+  webhook:='{"url": "http://localhost:3000/test/webhook"}'
+```
+
+![HTTPie Example](docs/httpie.png)
+
+HTTPie provides a more intuitive interface for API testing during development. Note the `:=` syntax for numbers and booleans, and `='...'` for JSON objects.
+
+This example shows a basic crawl of withseismic.com with common configuration options. The crawler will:
+
+- Crawl up to 100 pages
+- Go 3 levels deep into the site
+- Limit to 60 requests per minute
+- Run 10 concurrent crawls
+- Send results to a test webhook
+
+## Architecture Overview
+
+![GTM Crawler Architecture](docs/gtm-crawler-diagram.png)
+
+The diagram above shows how the GTM Crawler processes requests:
+
+1. Your automation platform sends a crawl request with webhook configuration
+2. The crawler processes the target website page by page
+3. Plugins extract and analyze content from each page
+4. Progress updates and final results are sent via webhooks
+5. Your automation workflow continues with the processed data
+
 ## Table of Contents
 
 - [Installation](#installation)

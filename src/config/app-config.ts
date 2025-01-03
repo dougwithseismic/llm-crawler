@@ -39,4 +39,18 @@ const loadConfig = () => {
   }
 };
 
-export const config = loadConfig();
+export interface AppConfig {
+  port: number;
+  tunnel: {
+    enabled: boolean;
+    authtoken?: string;
+  };
+}
+
+export const config: AppConfig = {
+  port: parseInt(process.env.PORT || '3000', 10),
+  tunnel: {
+    enabled: process.env.ENABLE_TUNNEL === 'true',
+    authtoken: process.env.NGROK_AUTHTOKEN,
+  },
+};

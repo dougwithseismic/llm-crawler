@@ -43,6 +43,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.0",
     "@types/ws": "^8.x.x",
+    "ngrok": "5.0.0-beta.2",
     "tsx": "^4.19.2",
     "typescript": "^5.3.3"
   },
@@ -59,7 +60,8 @@
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "setup:tunnel": "tsx scripts/setup-tunnel.ts"
   },
   "version": "0.0.0",
   "main": "src/index.ts",

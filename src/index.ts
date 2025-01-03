@@ -13,6 +13,7 @@ import { requestLogger } from './middleware/request-logger';
 
 // Bull Board imports
 import { ServiceContainer } from './utils/service-container';
+import { TunnelService } from './services/tunnel-service';
 
 // Initialize Express and HTTP server
 const app = express();
@@ -22,6 +23,26 @@ const container = ServiceContainer.getInstance();
 // Register core services
 container.register('config', config);
 container.register('redis', redis);
+
+// Initialize tunnel service if enabled
+const tunnelService = new TunnelService();
+if (config.tunnel.enabled) {
+  tunnelService
+    .connect({
+      port: config.port || 3000,
+      authtoken: config.tunnel.authtoken,
+    })
+    .catch((err) => {
+      logger.error('Failed to establish tunnel:', err);
+    });
+}
+
+// Cleanup on server shutdown
+process.on('SIGTERM', async () => {
+  await tunnelService.disconnect();
+  // ... any other cleanup
+  process.exit(0);
+});
 
 // Setup middleware chain for protected routes
 const protectedRouteMiddleware = createMiddlewareChain(
@@ -43,6 +64,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 // Setup routes
+app.use('/', async (req, res) => {
+  res.send('Hello World');
+});
 app.use('/api', protectedRouteMiddleware, require('./routes/api').default);
 app.use('/auth', authMiddleware, require('./routes/auth').default);
 

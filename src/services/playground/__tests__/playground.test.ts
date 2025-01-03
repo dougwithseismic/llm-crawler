@@ -51,6 +51,23 @@ describe('PlaygroundService', () => {
       expect(job.result?.summary).toEqual({ mock: { total: 1 } });
     });
 
+    it('should return immediately for async jobs', async () => {
+      // Setup mock with delay
+      mockPlugin.execute.mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return { processed: true };
+      });
+
+      const config = { input: 'test', async: true };
+      const job = await service.createJob(config);
+
+      // Should return before job completes
+      expect(job.id).toBeDefined();
+      expect(job.progress.status).toBe('running');
+      expect(job.progress.completedPlugins).toEqual([]);
+      expect(job.result?.metrics).toHaveLength(0);
+    });
+
     it('should respect custom retries config and handle errors', async () => {
       // Setup mock to throw error
       const error = new Error('Plugin execution failed');

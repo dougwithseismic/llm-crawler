@@ -1,6 +1,6 @@
 # Playground Service
 
-The Playground service is a flexible execution environment that allows you to run custom code through a plugin-based architecture while leveraging the same powerful webhook and event system as the crawler service.
+The Playground service is a flexible execution environment that allows you to run custom code through a plugin-based architecture with support for both synchronous and asynchronous execution modes.
 
 ## Table of Contents
 
@@ -12,28 +12,48 @@ The Playground service is a flexible execution environment that allows you to ru
 
 ## Key Features
 
+- **Flexible Execution Modes**: Choose between synchronous and asynchronous execution
 - **Plugin Architecture**: Extensible system for custom code execution and analysis
 - **Job Management**: Efficient handling of multiple execution jobs
 - **Storage System**: Built-in storage capabilities for plugins
-- **Webhook Integration**: Real-time progress notifications and event tracking
+- **Real-time Updates**: Comprehensive event system with webhook integration
 - **Error Handling**: Comprehensive error tracking and reporting
 - **TypeScript Support**: Full type safety and excellent IDE integration
 
 ## Quick Start
 
+### Synchronous Execution
+
 ```bash
-# Create a new job
+# Create and execute a job synchronously
 curl -X POST http://localhost:3000/playground/jobs \
   -H "Content-Type: application/json" \
   -d '{
     "input": {
       "data": "your input data here"
     },
-    "plugins": ["example-plugin"]
+    "plugins": ["example-plugin"],
+    "async": false
   }'
+```
 
-# Start the job
-curl -X POST http://localhost:3000/playground/jobs/{jobId}/start
+### Asynchronous Execution
+
+```bash
+# Create and execute a job asynchronously
+curl -X POST http://localhost:3000/playground/jobs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": {
+      "data": "your input data here"
+    },
+    "plugins": ["example-plugin"],
+    "async": true,
+    "webhook": {
+      "url": "https://your-server.com/webhook",
+      "on": ["completed", "failed"]
+    }
+  }'
 
 # Check job status
 curl http://localhost:3000/playground/jobs/{jobId}
@@ -56,11 +76,45 @@ src/
 
 The Playground service is ideal for:
 
-1. **Custom Data Processing**: Execute custom data transformation and analysis
-2. **Integration Testing**: Run integration tests with external services
-3. **Workflow Automation**: Create complex automation workflows with n8n or make.com
-4. **Data Enrichment**: Process and enrich data through custom plugins
-5. **Scheduled Tasks**: Execute periodic tasks with webhook notifications
+1. **Quick Data Processing**: Use synchronous mode for immediate results
+   - Data validation
+   - Simple transformations
+   - Quick API integrations
+
+2. **Long-running Tasks**: Use asynchronous mode with webhooks
+   - Complex data processing
+   - Multi-step workflows
+   - Resource-intensive operations
+
+3. **Integration Workflows**: Build automated pipelines
+   - Connect with n8n or make.com
+   - Chain multiple services
+   - Process results automatically
+
+4. **Real-time Monitoring**: Track progress with webhooks
+   - Monitor job execution
+   - Get plugin-level updates
+   - Handle errors immediately
+
+## Event System
+
+The service provides real-time updates through four event types:
+
+- `started`: Job execution has begun
+- `progress`: Plugin execution updates
+- `completed`: Job finished successfully
+- `failed`: Job encountered an error
+
+Configure which events to receive:
+
+```json
+{
+  "webhook": {
+    "url": "https://your-server.com/webhook",
+    "on": ["started", "completed", "failed"]
+  }
+}
+```
 
 ## Contributing
 

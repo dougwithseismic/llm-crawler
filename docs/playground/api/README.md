@@ -17,25 +17,57 @@ Create a new playground job with specified configuration.
 ```typescript
 {
   input: any;              // Input data for the job
-  timeout?: number;        // Optional timeout in milliseconds
   retries?: number;        // Optional number of retries (default: 3)
   plugins?: string[];      // Optional list of specific plugins to run
-  debug?: boolean;         // Optional debug mode flag
+  async?: boolean;         // Optional flag for async execution (default: false)
+  webhook?: {
+    url: string;          // Webhook URL for notifications
+    headers?: Record<string, string>;  // Optional custom headers
+    retries?: number;     // Optional webhook retry count
+    on?: Array<'started' | 'progress' | 'completed' | 'failed'>;  // Optional event filter
+  }
 }
 ```
 
+#### Synchronous vs Asynchronous Execution
+
+The `async` flag determines how the job execution behaves:
+
+- `async: false` (default): The request waits for job completion and returns final results
+- `async: true`: The request returns immediately with job ID, and progress can be monitored via webhooks or polling
+
 #### Response
+
+For synchronous execution:
 
 ```typescript
 {
-  id: string;             // Unique job ID
+  id: string;             // Job ID
   config: {...};          // Job configuration
   progress: {
-    status: string;       // Job status
+    status: 'completed';  // Final status
     startTime: string;    // Start timestamp
-    completedPlugins: string[];  // Completed plugin names
+    endTime: string;      // Completion timestamp
+    completedPlugins: string[];  // All completed plugins
   };
-  // Additional job metadata
+  result: {              // Complete results
+    metrics: any[];      // Plugin metrics
+    summary?: any;       // Optional summary
+  }
+}
+```
+
+For asynchronous execution:
+
+```typescript
+{
+  id: string;             // Job ID
+  config: {...};          // Job configuration
+  progress: {
+    status: 'queued';    // Initial status
+    startTime: string;    // Creation timestamp
+    completedPlugins: string[];  // Empty initially
+  }
 }
 ```
 
@@ -117,15 +149,88 @@ Error responses include a message:
 }
 ```
 
-## Event System
+## Webhook Events
 
-The Playground service emits events during job execution that can be consumed by external systems. These events include:
+When configured, the service sends webhook notifications for the following events:
 
-- `jobStart`: Job execution started
-- `jobComplete`: Job execution completed
-- `jobError`: Job execution failed
-- `pluginStart`: Plugin execution started
-- `pluginComplete`: Plugin execution completed
-- `pluginError`: Plugin execution failed
+### Event Types
 
-Each event includes relevant data about the job and its current state. For detailed information about consuming these events and integrating with external systems, see the [Webhook Events Guide](../guides/webhooks.md).
+- `started`: Job execution has started
+- `progress`: Plugin execution completed
+- `completed`: Job execution completed successfully
+- `failed`: Job execution failed
+
+### Webhook Payload Format
+
+```typescript
+{
+  status: 'started' | 'progress' | 'completed' | 'failed';
+  jobId: string;
+  timestamp: string;
+  // Additional event-specific data
+}
+```
+
+#### Started Event
+
+```typescript
+{
+  status: 'started',
+  jobId: string,
+  timestamp: string,
+  config: {
+    input: any,
+    plugins: string[]
+  }
+}
+```
+
+#### Progress Event
+
+```typescript
+{
+  status: 'progress',
+  jobId: string,
+  timestamp: string,
+  pluginName: string,
+  metrics: any,
+  progress: {
+    status: string,
+    completedPlugins: string[]
+    // ... other progress fields
+  }
+}
+```
+
+#### Completed Event
+
+```typescript
+{
+  status: 'completed',
+  jobId: string,
+  timestamp: string,
+  result: {
+    metrics: any[],
+    summary: any
+  },
+  summary: {
+    duration: number,
+    completedPlugins: string[]
+  }
+}
+```
+
+#### Failed Event
+
+```typescript
+{
+  status: 'failed',
+  jobId: string,
+  timestamp: string,
+  error: string,
+  progress: {
+    status: 'failed',
+    error: string,
+    // ... other progress fields
+  }
+}

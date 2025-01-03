@@ -4,15 +4,15 @@ This guide provides practical examples of using the Playground service for vario
 
 ## Table of Contents
 
-1. [Data Processing Pipeline](#data-processing-pipeline)
-2. [API Integration Chain](#api-integration-chain)
-3. [Data Validation System](#data-validation-system)
-4. [Machine Learning Pipeline](#machine-learning-pipeline)
+1. [Synchronous Processing](#synchronous-processing)
+2. [Asynchronous Processing](#asynchronous-processing)
+3. [Data Validation](#data-validation)
+4. [API Integration Chain](#api-integration-chain)
 5. [Document Processing](#document-processing)
 
-## Data Processing Pipeline
+## Synchronous Processing
 
-Create a pipeline that processes data through multiple stages.
+For quick operations that need immediate results.
 
 ### Plugin Implementation
 
@@ -61,82 +61,74 @@ curl -X POST http://localhost:3000/playground/jobs \
         {"id": 2, "value": "test2"}
       ]
     },
-    "plugins": ["data-processor"]
+    "plugins": ["data-processor"],
+    "async": false
   }'
 ```
 
-## API Integration Chain
+## Asynchronous Processing
 
-Chain multiple API calls with data transformation between them.
+For long-running operations with progress tracking.
 
 ### Plugin Implementation
 
 ```typescript
-interface ApiChainMetric {
-  source: string;
-  responseStatus: number;
-  transformedData: any;
+interface AsyncProcessingMetric {
+  progress: number;
+  processedItems: number;
+  remainingItems: number;
 }
 
-class ApiChainPlugin implements PlaygroundPlugin<ApiChainMetric> {
-  name = 'api-chain';
+class LongRunningPlugin implements PlaygroundPlugin<AsyncProcessingMetric> {
+  name = 'long-running-processor';
   enabled = true;
 
-  async execute(context: PlaygroundContext): Promise<ApiChainMetric> {
-    const { endpoint, transformFn } = context.input;
-
-    // Make API call
-    const response = await fetch(endpoint);
-    const data = await response.json();
-
-    // Transform data
-    const transformed = eval(transformFn)(data);
+  async execute(context: PlaygroundContext): Promise<AsyncProcessingMetric> {
+    const { items } = context.input;
+    let processed = 0;
+    
+    for (const item of items) {
+      // Simulate long processing
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      processed++;
+      
+      // Store progress
+      await context.storage.set('progress', {
+        processed,
+        total: items.length
+      });
+    }
 
     return {
-      source: endpoint,
-      responseStatus: response.status,
-      transformedData: transformed
+      progress: 100,
+      processedItems: processed,
+      remainingItems: 0
     };
   }
 }
 ```
 
-### Usage with n8n
+### Usage Example
 
-```typescript
-// n8n Workflow
-{
-  "nodes": [
-    {
-      "name": "Event Listener",
-      "type": "n8n-nodes-base.webhook",
-      "parameters": {
-        "path": "api-chain-events",
-        "options": {}
-      }
+```bash
+curl -X POST http://localhost:3000/playground/jobs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": {
+      "items": [1, 2, 3, 4, 5]
     },
-    {
-      "name": "HTTP Request",
-      "type": "n8n-nodes-base.httpRequest",
-      "parameters": {
-        "url": "http://localhost:3000/playground/jobs",
-        "method": "POST",
-        "body": {
-          "input": {
-            "endpoint": "https://api.example.com/data",
-            "transformFn": "data => data.map(x => x.value.toUpperCase())"
-          },
-          "plugins": ["api-chain"]
-        }
-      }
+    "plugins": ["long-running-processor"],
+    "async": true,
+    "webhook": {
+      "url": "https://your-server.com/webhook",
+      "on": ["progress", "completed"]
     }
-  ]
-}
+  }'
 ```
 
-## Data Validation System
+## Data Validation
 
-Implement a validation system with custom rules and reporting.
+Implement a validation system with custom rules.
 
 ### Plugin Implementation
 
@@ -176,32 +168,39 @@ class ValidationPlugin implements PlaygroundPlugin<ValidationMetric> {
 }
 ```
 
-### Usage with Make.com
+### Usage with n8n
 
 ```typescript
-// Make.com Scenario
+// n8n Workflow
 {
-  "trigger": {
-    "type": "event",
-    "path": "validation-events"
-  },
-  "actions": [
+  "nodes": [
     {
-      "type": "http",
-      "url": "http://localhost:3000/playground/jobs",
-      "method": "POST",
-      "body": {
-        "input": {
-          "schema": {
-            "email": { "type": "email", "required": true },
-            "age": { "type": "number", "min": 18 }
+      "name": "Event Listener",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": {
+        "path": "validation-events"
+      }
+    },
+    {
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "url": "http://localhost:3000/playground/jobs",
+        "method": "POST",
+        "body": {
+          "input": {
+            "schema": {
+              "email": { "type": "email", "required": true },
+              "age": { "type": "number", "min": 18 }
+            },
+            "data": {
+              "email": "test@example.com",
+              "age": 25
+            }
           },
-          "data": {
-            "email": "test@example.com",
-            "age": 25
-          }
-        },
-        "plugins": ["validator"]
+          "plugins": ["validator"],
+          "async": true
+        }
       }
     }
   ]
@@ -210,24 +209,38 @@ class ValidationPlugin implements PlaygroundPlugin<ValidationMetric> {
 
 ## Integration Patterns
 
-### 1. Event-Driven Processing
+### 1. Sync/Async Decision
 
-Chain operations based on events:
+Choose execution mode based on operation:
 
 ```typescript
-// Event listener triggers new job based on completion
-Event → Process Results → Start New Job → Process Final Results
+// Quick operations: Use sync mode
+{
+  "async": false,
+  "plugins": ["quick-processor"]
+}
+
+// Long operations: Use async mode with webhooks
+{
+  "async": true,
+  "webhook": {
+    "url": "https://your-server.com/webhook",
+    "on": ["progress", "completed"]
+  },
+  "plugins": ["long-processor"]
+}
 ```
 
-### 2. Conditional Processing
+### 2. Progress Tracking
 
-Use events to make decisions:
+Monitor long-running operations:
 
 ```typescript
-// n8n decision workflow
-Event Listener → Switch Node (based on result) →
-  → Success: Process data
-  → Error: Notify team
+// n8n workflow
+Event Listener → Switch Node (based on event.status) →
+  → Progress: Update Dashboard
+  → Completed: Process Results
+  → Failed: Send Alert
 ```
 
 ### 3. Parallel Processing
@@ -237,30 +250,30 @@ Run multiple jobs and aggregate results:
 ```typescript
 // Make.com parallel scenario
 Trigger → Split → 
-  → Job 1
-  → Job 2
-  → Job 3
-→ Aggregate Results
+  → Async Job 1
+  → Async Job 2
+  → Async Job 3
+→ Wait All Complete → Aggregate Results
 ```
 
 ## Best Practices
 
-1. **Error Handling**
+1. **Execution Mode**
+   - Use sync mode for sub-second operations
+   - Use async mode for operations > 1 second
+   - Consider client timeout limits
+
+2. **Error Handling**
    - Implement proper try/catch blocks
-   - Handle events properly
+   - Use webhook error events
    - Log errors comprehensively
 
-2. **Performance**
+3. **Progress Updates**
+   - Store progress in plugin storage
+   - Emit progress events regularly
+   - Include meaningful metrics
+
+4. **Performance**
    - Process data in chunks
-   - Implement proper timeouts
-   - Use caching when appropriate
-
-3. **Monitoring**
-   - Track job progress
+   - Use appropriate execution mode
    - Monitor resource usage
-   - Set up alerts for failures
-
-4. **Security**
-   - Validate input data
-   - Implement proper authentication
-   - Sanitize outputs

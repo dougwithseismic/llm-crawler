@@ -104,8 +104,19 @@ export class PlaygroundService extends EventEmitter {
 
     this.jobs.set(id, job);
 
-    // Start job immediately
-    return this.startJob(id);
+    // Start job
+    if (config.async) {
+      // Start job in background
+      this.startJob(id).catch((error) => {
+        console.error(`Async job ${id} failed:`, error);
+      });
+
+      // Return job immediately
+      return job;
+    } else {
+      // Wait for job completion
+      return this.startJob(id);
+    }
   }
 
   async startJob(id: string): Promise<PlaygroundJob> {

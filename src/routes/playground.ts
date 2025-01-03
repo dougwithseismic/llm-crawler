@@ -11,12 +11,30 @@ const playgroundService = new PlaygroundService({
 // Create a new playground job
 router.post('/jobs', async (req, res) => {
   try {
-    const job = await playgroundService.createJob({
-      input: req.body.input,
-      retries: req.body.retries ?? 3,
-      plugins: req.body.plugins,
-    });
+    const service = createServiceWithPlugins(req.body.plugins);
 
+    const config = {
+      input: req.body.input,
+      timeout: req.body.timeout,
+      retries: req.body.retries,
+      debug: req.body.debug,
+      webhook: req.body.webhook,
+      async: req.body.async,
+    };
+
+    const job = await service.createJob(config);
+
+    // If async is true, return immediately with job ID
+    if (config.async) {
+      res.json({
+        jobId: job.id,
+        status: 'accepted',
+        message: 'Job started successfully',
+      });
+      return;
+    }
+
+    // Otherwise wait for job completion
     res.json(job);
   } catch (error) {
     res.status(500).json({

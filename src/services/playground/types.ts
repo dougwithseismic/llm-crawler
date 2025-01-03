@@ -41,6 +41,7 @@ export interface PlaygroundConfig {
   retries?: number;
   plugins?: string[];
   webhook?: WebhookConfig;
+  async?: boolean; // If true, don't wait for job completion before responding
 }
 
 export interface PlaygroundProgress {

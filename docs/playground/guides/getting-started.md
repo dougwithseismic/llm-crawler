@@ -8,15 +8,19 @@ The Playground service allows you to:
 
 - Execute custom code through plugins
 - Process data with configurable pipelines
+- Choose between synchronous and asynchronous execution
 - Track execution progress and results
-- Chain multiple processing steps
-- Integrate with external systems through events
+- Receive real-time updates via webhooks
 
 ## Quick Start
 
-### 1. Create a Job
+### 1. Create and Execute a Job
 
-First, create a job with your input data:
+The service supports two execution modes: synchronous and asynchronous.
+
+#### Synchronous Execution (Default)
+
+In synchronous mode, the request waits for job completion:
 
 ```bash
 curl -X POST http://localhost:3000/playground/jobs \
@@ -25,11 +29,56 @@ curl -X POST http://localhost:3000/playground/jobs \
     "input": {
       "data": "your input data"
     },
-    "plugins": ["example-plugin"]
+    "plugins": ["example-plugin"],
+    "async": false
   }'
 ```
 
-Response:
+Response includes complete results:
+
+```json
+{
+  "id": "job-123",
+  "config": {
+    "input": {
+      "data": "your input data"
+    },
+    "plugins": ["example-plugin"]
+  },
+  "progress": {
+    "status": "completed",
+    "startTime": "2025-01-03T19:05:32.000Z",
+    "endTime": "2025-01-03T19:05:33.000Z",
+    "completedPlugins": ["example-plugin"]
+  },
+  "result": {
+    "metrics": [...],
+    "summary": {...}
+  }
+}
+```
+
+#### Asynchronous Execution
+
+For long-running jobs, use async mode:
+
+```bash
+curl -X POST http://localhost:3000/playground/jobs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": {
+      "data": "your input data"
+    },
+    "plugins": ["example-plugin"],
+    "async": true,
+    "webhook": {
+      "url": "https://your-server.com/webhook",
+      "on": ["completed", "failed"]
+    }
+  }'
+```
+
+Response returns immediately:
 
 ```json
 {
@@ -42,26 +91,43 @@ Response:
   },
   "progress": {
     "status": "queued",
-    "startTime": "2025-01-03T19:54:17.000Z",
+    "startTime": "2025-01-03T19:05:32.000Z",
     "completedPlugins": []
   }
 }
 ```
 
-### 2. Start the Job
+### 2. Monitor Progress
 
-Use the job ID to start execution:
+For async jobs, you can either:
 
-```bash
-curl -X POST http://localhost:3000/playground/jobs/job-123/start
-```
-
-### 3. Check Progress
-
-Monitor the job's progress:
+1. Poll the progress endpoint:
 
 ```bash
 curl http://localhost:3000/playground/jobs/job-123/progress
+```
+
+2. Or receive webhook notifications:
+
+```json
+{
+  "status": "progress",
+  "jobId": "job-123",
+  "timestamp": "2025-01-03T19:05:32.000Z",
+  "pluginName": "example-plugin",
+  "progress": {
+    "status": "running",
+    "completedPlugins": []
+  }
+}
+```
+
+### 3. Get Final Results
+
+For async jobs, fetch results when complete:
+
+```bash
+curl http://localhost:3000/playground/jobs/job-123
 ```
 
 ## Basic Configuration
@@ -74,18 +140,21 @@ curl http://localhost:3000/playground/jobs/job-123/progress
   input: any;              // Input data for processing
 
   // Optional
-  timeout?: number;        // Processing timeout (ms)
+  async?: boolean;         // Enable async execution
   retries?: number;        // Number of retry attempts
   plugins?: string[];      // Specific plugins to run
-  debug?: boolean;         // Enable debug mode
+  webhook?: {
+    url: string;          // Webhook endpoint
+    headers?: Record<string, string>;  // Custom headers
+    retries?: number;     // Retry attempts
+    on?: Array<'started' | 'progress' | 'completed' | 'failed'>;
+  }
 }
 ```
 
 ## Using Built-in Plugins
 
-The service comes with some built-in plugins. Here's how to use them:
-
-### Example Plugin
+The service comes with some built-in plugins:
 
 ```bash
 curl -X POST http://localhost:3000/playground/jobs \
@@ -94,7 +163,8 @@ curl -X POST http://localhost:3000/playground/jobs \
     "input": {
       "data": "test data"
     },
-    "plugins": ["example-plugin"]
+    "plugins": ["example-plugin"],
+    "async": true
   }'
 ```
 
@@ -110,8 +180,8 @@ Response includes:
 
 - Current status
 - Progress information
-- Plugin results
-- Error details (if any)
+- Plugin results (if completed)
+- Error details (if failed)
 
 ### Track Progress
 
@@ -135,7 +205,7 @@ The service provides detailed error information:
   "error": {
     "message": "Error description",
     "plugin": "plugin-name",
-    "timestamp": "2025-01-03T19:54:17.000Z"
+    "timestamp": "2025-01-03T19:05:32.000Z"
   }
 }
 ```
@@ -147,10 +217,10 @@ The service provides detailed error information:
    - Understand plugin lifecycle
    - Implement custom logic
 
-2. [Event System](./webhooks.md)
-   - Understand available events
-   - Integrate with external systems
-   - Handle event data
+2. [Configure Webhooks](./webhooks.md)
+   - Set up real-time notifications
+   - Handle webhook events
+   - Implement retry logic
 
 3. [Explore Examples](../examples/README.md)
    - View implementation examples
@@ -159,36 +229,31 @@ The service provides detailed error information:
 
 ## Common Use Cases
 
-1. **Data Processing**
-   - Transform data formats
-   - Validate input data
-   - Generate reports
+1. **Synchronous Processing**
+   - Data validation
+   - Quick transformations
+   - Simple API integrations
 
-2. **API Integration**
-   - Chain API calls
-   - Transform responses
-   - Handle errors
-
-3. **Automation**
-   - Schedule jobs
-   - Process queues
-   - Monitor results
+2. **Asynchronous Processing**
+   - Long-running tasks
+   - Complex data processing
+   - Multi-step workflows
 
 ## Tips and Best Practices
 
-1. **Job Management**
-   - Use meaningful input data
-   - Set appropriate timeouts
-   - Configure retry attempts
+1. **Choosing Execution Mode**
+   - Use sync mode for quick operations
+   - Use async mode for long-running tasks
+   - Consider timeout limits
 
-2. **Event Handling**
-   - Listen for relevant events
-   - Process events asynchronously
-   - Handle event failures
+2. **Webhook Usage**
+   - Filter events based on needs
+   - Implement proper error handling
+   - Use retries for reliability
 
 3. **Error Handling**
    - Check job status regularly
-   - Monitor event emissions
+   - Monitor webhook deliveries
    - Log error details
 
 4. **Performance**
@@ -205,9 +270,9 @@ The service provides detailed error information:
    - Verify input format
    - Check plugin availability
 
-2. **Event Issues**
-   - Verify event listener setup
-   - Check event data format
+2. **Webhook Issues**
+   - Verify endpoint URL
+   - Check event filtering
    - Review error messages
 
 3. **Plugin Errors**

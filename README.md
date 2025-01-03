@@ -1,6 +1,6 @@
-# LLM Crawler Service
+# GTM Crawler
 
-A powerful web crawler service built with TypeScript, Express, and Playwright. Features include plugin-based analysis, webhook notifications, and a robust queuing system.
+A local-first crawler for Go To Market teams with big ambitions. Built with TypeScript, Express, and Playwright, this tool allows you to crawl websites and extract valuable data for your GTM strategy. Features include plugin-based analysis, webhook notifications, and seamless integration with Clay.com and n8n.
 
 ## Table of Contents
 
@@ -18,8 +18,8 @@ A powerful web crawler service built with TypeScript, Express, and Playwright. F
 1. Clone the repository:
 
 ```bash
-git clone [your-repo-url]
-cd [your-repo-name]
+git clone https://github.com/dougwithseismic/gtm-crawler.git
+cd gtm-crawler
 ```
 
 2. Install dependencies:

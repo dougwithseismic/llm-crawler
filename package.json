@@ -47,7 +47,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.3.3"
   },
-  "name": "seismic-scraper",
+  "name": "gtm-crawler",
   "private": true,
   "scripts": {
     "build": "dotenv -e .env.local -- tsc",
@@ -63,9 +63,27 @@
     "test:ui": "vitest --ui",
     "setup:tunnel": "tsx scripts/setup-tunnel.ts"
   },
-  "version": "0.0.0",
+  "version": "1.0.0",
   "main": "src/index.ts",
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "author": "Doug Wilson <doug@withseismic.com>",
+  "license": "MIT",
+  "description": "A local-first crawler for Go To Market teams with big ambitions. Built with TypeScript, Express, and Playwright.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dougwithseismic/gtm-crawler.git"
+  },
+  "keywords": [
+    "gtm",
+    "go-to-market",
+    "crawler",
+    "sales",
+    "marketing",
+    "clay",
+    "n8n",
+    "playwright"
+  ],
+  "bugs": {
+    "url": "https://github.com/dougwithseismic/gtm-crawler/issues"
+  },
+  "homepage": "https://github.com/dougwithseismic/gtm-crawler#readme"
 }

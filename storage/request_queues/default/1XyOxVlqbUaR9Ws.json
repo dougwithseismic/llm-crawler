@@ -1,9 +1,0 @@
-{
-	"id": "1XyOxVlqbUaR9Ws",
-	"json": "{\"id\":\"1XyOxVlqbUaR9Ws\",\"url\":\"https://withseismic.com/privacy-policy\",\"loadedUrl\":\"https://withseismic.com/privacy-policy\",\"uniqueKey\":\"https://withseismic.com/privacy-policy\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"__crawlee\":{\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-01-03T14:08:41.373Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://withseismic.com/privacy-policy",
-	"url": "https://withseismic.com/privacy-policy"
-}

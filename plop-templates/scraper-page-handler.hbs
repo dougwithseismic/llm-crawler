@@ -1,0 +1,15 @@
+import { PuppeteerCrawlingContext } from 'crawlee'
+import { scrape{{pascalCase name}}Data } from '../services/scrape-{{kebabCase name}}-data'
+
+export const {{camelCase name}}PageHandler = async ({
+    page,
+    request,
+    enqueueLinks,
+    log,
+}: PuppeteerCrawlingContext): Promise<void> => {
+    const pageUrl = new URL(request.url)
+    const {{camelCase name}}Data = await scrape{{pascalCase name}}Data(page)
+
+    // Save the data to the database...
+    console.log({{camelCase name}}Data)
+}

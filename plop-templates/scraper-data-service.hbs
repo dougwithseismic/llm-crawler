@@ -1,0 +1,21 @@
+import { Page } from 'puppeteer'
+import { {{pascalCase name}}Data } from '../types/{{kebabCase name}}-data'
+
+export const scrape{{pascalCase name}}Data = async (page: Page): Promise<{{pascalCase name}}Data> => {
+    const title = (await page.$eval('.title', (el) => el.textContent)) || ''
+    const slug = title.toLowerCase().replace(/\s+/g, '-')
+    const mainImageUrl = (await page.$eval('.main-image', (img) => img.getAttribute('src'))) || ''
+    const detailsUrl = (await page.$eval('.details-link', (a) => a.getAttribute('href'))) || ''
+    const summary = (await page.$eval('.summary', (el) => el.textContent)) || ''
+    const tags =
+        (await page.$$eval('.tag', (tags) => tags.map((tag) => tag.textContent || ''))) || []
+
+    return {
+        title,
+        slug,
+        mainImageUrl,
+        detailsUrl,
+        summary,
+        tags,
+    }
+}

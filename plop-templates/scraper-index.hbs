@@ -1,0 +1,32 @@
+import { BrowserName, DeviceCategory } from '@crawlee/browser-pool'
+import createCrawler from '../create-crawler'
+import { {{camelCase name}}CrawleeRouter } from './router'
+
+const create{{pascalCase name}}Crawler = () => {
+    const new{{pascalCase name}}Scraper = createCrawler({
+        options: {
+            minConcurrency: 5,
+            maxConcurrency: 15,
+            headless: true,
+            requestHandler: {{camelCase name}}CrawleeRouter,
+            browserPoolOptions: {
+                useFingerprints: true,
+                fingerprintOptions: {
+                    fingerprintGeneratorOptions: {
+                        browsers: [BrowserName.chrome, BrowserName.firefox, BrowserName.safari],
+                        devices: [DeviceCategory.desktop],
+                        locales: ['en-US'],
+                    },
+                },
+            },
+        },
+    })
+
+    new{{pascalCase name}}Scraper.addRequests(['https://www.{{lowercase name}}.com/'])
+
+    return new{{pascalCase name}}Scraper
+}
+
+const {{camelCase name}}Crawler = create{{pascalCase name}}Crawler()
+
+export default {{camelCase name}}Crawler

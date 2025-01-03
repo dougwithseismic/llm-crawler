@@ -1,10 +1,19 @@
 # GTM Crawler
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-8.x-orange.svg)](https://pnpm.io/)
+[![Playwright](https://img.shields.io/badge/Playwright-Latest-blueviolet.svg)](https://playwright.dev/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
 A local-first crawler for Go To Market teams with big ambitions.
 
 This tool allows you to locally crawl websites and extract all the data you need for your GTM strat. The real win here is that Clay, Make, n8n etc can all interact with the tool, all whilst it runs locally on your machine.
 
 You can make http requests to your local instance just like you would any other API endpoint, and specify the webhooks you wanna fire off on successful crawling progress/completion.
+
+![intro](docs/main.png)
 
 With the right plugins (I'll build examples), you should be able to do BASICALLY WHATEVER YOU WANT and get it into your automations.
 

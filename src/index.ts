@@ -10,6 +10,7 @@ import apiRoutes from './routes/api';
 import authRoutes from './routes/auth';
 import crawlRoutes from './routes/crawl';
 import healthRoutes from './routes/health';
+import linkedinRoutes from './routes/linkedin';
 import testRoutes from './routes/test';
 import { TunnelService } from './services/tunnel-service';
 
@@ -27,6 +28,7 @@ app.use('/', healthRoutes);
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/crawl', crawlRoutes);
+app.use('/linkedin', linkedinRoutes);
 app.use('/test', testRoutes);
 
 // Error handling

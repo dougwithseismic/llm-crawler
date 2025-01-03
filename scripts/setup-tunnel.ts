@@ -59,7 +59,7 @@ const flickerLine = (line: string): string => {
 
   for (let i = 0; i < numFlickers; i++) {
     const pos = Math.floor(Math.random() * chars.length);
-    if (chars[pos] !== ' ' && chars[pos] !== '⚡️') {
+    if (chars[pos] !== ' ') {
       chars[pos] = getRandomChar();
     }
   }
@@ -155,6 +155,10 @@ const main = async () => {
   await printWithDelay('\nMay your code flow like rivers of mithril!\n');
 
   rl.close();
+
+  // Start the development server
+  await printWithDelay('\nIgniting the forge fires...');
+  execSync('pnpm dev', { stdio: 'inherit' });
 };
 
 main().catch(console.error);

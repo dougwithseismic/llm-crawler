@@ -43,4 +43,7 @@ Thumbs.db
 .debug/
 
 # Vitest
-html/ 
+html/
+
+# Crawler
+storage/

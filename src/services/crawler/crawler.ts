@@ -4,6 +4,8 @@ import {
   createPlaywrightRouter,
   type PlaywrightCrawlingContext,
   Sitemap,
+  Configuration,
+  purgeDefaultStorages,
 } from 'crawlee';
 import { chromium, type Page } from 'playwright';
 import type {
@@ -381,6 +383,7 @@ export class CrawlerService extends EventEmitter {
       maxRequestsPerMinute: job.config.maxRequestsPerMinute || 60,
       maxConcurrency: job.config.maxConcurrency || 10,
       maxRequestRetries: job.maxRetries || 3,
+
       requestHandler: router,
       launchContext: {
         launcher: chromium,

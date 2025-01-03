@@ -7,6 +7,7 @@ This guide will help you set up and start using the LLM Crawler service.
 - Node.js 18 or higher
 - npm or pnpm package manager
 - Redis server (for queue management)
+- ngrok account (for tunnel setup)
 
 ## Installation
 
@@ -17,38 +18,40 @@ git clone [repository-url]
 cd llm-crawler
 ```
 
-2. Install dependencies:
+2. Install dependencies and set up the tunnel:
 
 ```bash
-npm install
-# or with pnpm
-pnpm install
+pnpm setup:tunnel
 ```
+
+This will:
+
+- Install project dependencies
+- Guide you through ngrok tunnel setup
+- Prompt for your ngrok authtoken (get it from <https://dashboard.ngrok.com/get-started/your-authtoken>)
+- Configure the environment for tunnel access
+- Start the development server automatically
 
 3. Configure environment variables:
 
 ```bash
-# Create a .env file
-cp .env.example .env
-
-# Required environment variables
+# Required environment variables in .env.local
 NODE_ENV=development
 PORT=3000
 REDIS_URL=redis://localhost:6379
+ENABLE_TUNNEL=true          # Added by setup:tunnel
+NGROK_AUTHTOKEN=your-token  # Added by setup:tunnel
 ```
 
 ## Basic Usage
 
-1. Start the server:
+Once the server is running (started automatically by setup:tunnel), you'll see a tunnel URL in your terminal. Use this URL as your base endpoint for API requests.
+
+1. Make your first crawl request:
 
 ```bash
-npm start
-```
-
-2. Make your first crawl request:
-
-```bash
-curl -X POST http://localhost:3000/crawl/example.com \
+# Replace {tunnel-url} with your ngrok URL
+curl -X POST {tunnel-url}/crawl/example.com \
   -H "Content-Type: application/json" \
   -d '{
     "webhook": {
@@ -57,7 +60,7 @@ curl -X POST http://localhost:3000/crawl/example.com \
   }'
 ```
 
-3. Monitor progress through webhook updates:
+2. Monitor progress through webhook updates:
 
 - Job start notification
 - Regular progress updates
@@ -95,7 +98,8 @@ interface CrawlConfig {
 Here's a complete example with all options:
 
 ```bash
-curl -X POST http://localhost:3000/crawl/example.com \
+# Replace {tunnel-url} with your ngrok URL
+curl -X POST {tunnel-url}/crawl/example.com \
   -H "Content-Type: application/json" \
   -d '{
     "maxDepth": 3,
@@ -135,6 +139,7 @@ Common issues and solutions:
    - Verify Redis is running
    - Check network connectivity
    - Ensure valid webhook URL
+   - Verify ngrok tunnel is active
 
 2. **Timeout Issues**
    - Adjust timeout settings
@@ -145,5 +150,11 @@ Common issues and solutions:
    - Limit maxPages
    - Reduce maxConcurrency
    - Monitor system resources
+
+4. **Tunnel Issues**
+   - Verify NGROK_AUTHTOKEN is correct
+   - Check ENABLE_TUNNEL is set to true
+   - Restart the server if tunnel fails
+   - Use `pnpm setup:tunnel` to reconfigure
 
 For more help, check our [troubleshooting guide](troubleshooting.md) or open an issue on GitHub.

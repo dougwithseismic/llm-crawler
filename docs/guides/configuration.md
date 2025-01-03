@@ -2,35 +2,143 @@
 
 This guide covers all configuration options available in the LLM Crawler and provides recommendations for different use cases.
 
-## Configuration Options
+## Configuration Parameters
 
-### Core Configuration
+### Core Parameters
 
 ```typescript
 interface CrawlConfig {
-  // Required
-  url: string;           // Starting URL for crawl
-  webhook: {
-    url: string;        // Webhook URL for updates
-    headers?: Record<string, string>;
-    retries?: number;   // 1-5 (default: 3)
-    on?: WebhookEventType[];
+  /**
+   * The starting URL for the crawl.
+   * This should be a valid URL with protocol (http/https).
+   * Example: "https://example.com"
+   * Required: Yes
+   */
+  url: string;
+
+  /**
+   * Maximum depth to crawl from the starting URL.
+   * - 1: Only crawl the starting URL
+   * - 2: Crawl starting URL and direct links
+   * - 3+: Continue following links to specified depth
+   * Range: 1-10
+   * Default: unlimited
+   */
+  maxDepth?: number;
+
+  /**
+   * Maximum number of pages to crawl.
+   * Useful for limiting resource usage and execution time.
+   * Range: 1-1000
+   * Default: unlimited
+   */
+  maxPages?: number;
+
+  /**
+   * Maximum number of requests per minute.
+   * Controls crawl rate to avoid overwhelming target servers.
+   * Range: 1-300
+   * Default: 60
+   */
+  maxRequestsPerMinute?: number;
+
+  /**
+   * Maximum number of concurrent page loads.
+   * Higher values increase speed but also resource usage.
+   * Range: 1-100
+   * Default: 10
+   */
+  maxConcurrency?: number;
+
+  /**
+   * Timeout settings for various operations.
+   */
+  timeout?: {
+    /**
+     * Maximum time to wait for page load completion.
+     * Includes initial load and network idle.
+     * Range: 1000-60000ms
+     * Default: 30000
+     */
+    page?: number;
+
+    /**
+     * Maximum time to wait for individual requests.
+     * Applies to resource loading (images, scripts, etc.).
+     * Range: 1000-60000ms
+     * Default: 30000
+     */
+    request?: number;
   };
 
-  // Optional
-  maxDepth?: number;     // 1-10 (default: unlimited)
-  maxPages?: number;     // 1-1000 (default: unlimited)
-  maxRequestsPerMinute?: number;  // 1-300 (default: 60)
-  maxConcurrency?: number;  // 1-100 (default: 10)
-  timeout?: {
-    page?: number;      // 1000-60000ms (default: 30000)
-    request?: number;   // 1000-60000ms (default: 30000)
-  };
+  /**
+   * Custom HTTP headers to send with requests.
+   * Useful for authentication or custom identifiers.
+   * Example: { "Authorization": "Bearer token" }
+   */
   headers?: Record<string, string>;
+
+  /**
+   * Custom User-Agent string for requests.
+   * Identifies your crawler to target servers.
+   * Example: "MyBot/1.0 (+https://mybot.com)"
+   */
   userAgent?: string;
-  respectRobotsTxt?: boolean;  // default: false
+
+  /**
+   * Whether to respect robots.txt rules.
+   * Recommended true for production use.
+   * Default: false
+   */
+  respectRobotsTxt?: boolean;
+
+  /**
+   * URL to sitemap for guided crawling.
+   * Can improve crawl efficiency and coverage.
+   * Example: "https://example.com/sitemap.xml"
+   */
   sitemapUrl?: string | null;
+
+  /**
+   * Custom function to filter URLs before crawling.
+   * Return true to crawl, false to skip.
+   * Example: (url) => url.includes('/blog/')
+   */
   urlFilter?: (url: string) => boolean;
+
+  /**
+   * Webhook configuration for status updates.
+   * Required for receiving crawl results and progress.
+   */
+  webhook: {
+    /**
+     * URL to receive webhook notifications.
+     * Must be publicly accessible.
+     * Required: Yes
+     */
+    url: string;
+
+    /**
+     * Custom headers for webhook requests.
+     * Useful for authentication.
+     * Example: { "Authorization": "Bearer token" }
+     */
+    headers?: Record<string, string>;
+
+    /**
+     * Number of retry attempts for failed webhook calls.
+     * Range: 1-5
+     * Default: 3
+     */
+    retries?: number;
+
+    /**
+     * Array of events to receive webhooks for.
+     * Options: 'started', 'progress', 'completed', 'failed'
+     * Default: All events
+     */
+    on?: ('started' | 'progress' | 'completed' | 'failed')[];
+  };
 }
 ```
 
@@ -42,13 +150,13 @@ Best for sites with less than 100 pages:
 
 ```typescript
 {
-  maxDepth: 5,
-  maxPages: 100,
-  maxRequestsPerMinute: 60,
-  maxConcurrency: 5,
+  maxDepth: 5,          // Moderate depth
+  maxPages: 100,        // Limited page count
+  maxRequestsPerMinute: 60,  // Standard rate
+  maxConcurrency: 5,    // Moderate concurrency
   timeout: {
-    page: 30000,
-    request: 10000
+    page: 30000,        // Standard page timeout
+    request: 10000      // Quick request timeout
   }
 }
 ```
@@ -59,15 +167,15 @@ For sites with thousands of pages:
 
 ```typescript
 {
-  maxDepth: 10,
-  maxPages: 1000,
-  maxRequestsPerMinute: 120,
-  maxConcurrency: 10,
+  maxDepth: 10,         // Deep crawl
+  maxPages: 1000,       // High page limit
+  maxRequestsPerMinute: 120,  // Faster rate
+  maxConcurrency: 10,   // High concurrency
   timeout: {
-    page: 45000,
-    request: 15000
+    page: 45000,        // Longer page timeout
+    request: 15000      // Standard request timeout
   },
-  sitemapUrl: "https://example.com/sitemap.xml"
+  sitemapUrl: "https://example.com/sitemap.xml"  // Use sitemap for efficiency
 }
 ```
 
@@ -77,12 +185,12 @@ When you want to be extra considerate of the target site:
 
 ```typescript
 {
-  maxRequestsPerMinute: 30,
-  maxConcurrency: 3,
-  respectRobotsTxt: true,
+  maxRequestsPerMinute: 30,   // Low rate
+  maxConcurrency: 3,          // Low concurrency
+  respectRobotsTxt: true,     // Honor robots.txt
   userAgent: "FriendlyBot/1.0 (+https://your-company.com/bot)",
   timeout: {
-    page: 60000,
+    page: 60000,              // Patient timeouts
     request: 20000
   }
 }
@@ -94,13 +202,13 @@ When focusing on performance metrics:
 
 ```typescript
 {
-  maxConcurrency: 1,
-  maxRequestsPerMinute: 30,
+  maxConcurrency: 1,          // Single thread for accurate timing
+  maxRequestsPerMinute: 30,   // Slower rate for better measurement
   timeout: {
-    page: 60000,
+    page: 60000,              // Long timeouts for slow pages
     request: 30000
   },
-  urlFilter: (url) => !url.includes('?') // Skip dynamic pages
+  urlFilter: (url) => !url.includes('?')  // Skip dynamic pages
 }
 ```
 
@@ -108,9 +216,9 @@ When focusing on performance metrics:
 
 ```bash
 # Required
-NODE_ENV=development|production
-PORT=3000
-REDIS_URL=redis://localhost:6379
+NODE_ENV=development|production  # Application environment
+PORT=3000                       # Server port
+REDIS_URL=redis://localhost:6379  # Redis connection URL
 
 # Optional
 DEBUG=crawler:*            # Enable debug logging
@@ -118,16 +226,13 @@ MAX_MEMORY_MB=4096        # Memory limit for browser
 DEFAULT_USER_AGENT=       # Default crawler user agent
 MAX_RETRIES=3            # Job retry attempts
 WEBHOOK_TIMEOUT=30000    # Webhook request timeout
+ENABLE_TUNNEL=true       # Enable ngrok tunnel
+NGROK_AUTHTOKEN=         # Your ngrok auth token
 ```
 
 ## Best Practices
 
 ### 1. Rate Limiting
-
-- Start with lower rates and increase gradually
-- Monitor target site response times
-- Adjust based on site's capabilities
-- Consider time of day for crawling
 
 ```typescript
 {
@@ -137,11 +242,6 @@ WEBHOOK_TIMEOUT=30000    # Webhook request timeout
 ```
 
 ### 2. Resource Management
-
-- Set appropriate memory limits
-- Monitor CPU usage
-- Adjust concurrency based on resources
-- Clean up completed jobs
 
 ```typescript
 {
@@ -153,11 +253,6 @@ WEBHOOK_TIMEOUT=30000    # Webhook request timeout
 ```
 
 ### 3. Error Handling
-
-- Set reasonable timeouts
-- Configure retry attempts
-- Handle webhook failures
-- Log errors appropriately
 
 ```typescript
 {
@@ -173,11 +268,6 @@ WEBHOOK_TIMEOUT=30000    # Webhook request timeout
 ```
 
 ### 4. URL Filtering
-
-- Filter out non-relevant URLs
-- Skip dynamic parameters
-- Focus on important sections
-- Avoid duplicate content
 
 ```typescript
 {

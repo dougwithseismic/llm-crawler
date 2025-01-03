@@ -1,6 +1,6 @@
 # API Reference
 
-Comprehensive documentation of the LLM Crawler REST API endpoints, including request/response formats, headers, and examples.
+Comprehensive documentation of the GTM Crawler REST API endpoints, including request/response formats, headers, and examples.
 
 ## Base URL
 

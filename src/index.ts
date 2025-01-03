@@ -1,25 +1,20 @@
-import express from 'express';
+import { logger } from '@/config/logger';
 import cors from 'cors';
+import express from 'express';
 import helmet from 'helmet';
-import { rateLimit } from 'express-rate-limit';
-import { Redis } from 'ioredis';
-import { requestLogger } from './middleware/request-logger';
 import { errorHandler } from './middleware/error-handler';
+import { requestLogger } from './middleware/request-logger';
 
 // Import routes
-import healthRoutes from './routes/health';
-import authRoutes from './routes/auth';
 import apiRoutes from './routes/api';
+import authRoutes from './routes/auth';
 import crawlRoutes from './routes/crawl';
-import { logger } from './config/logger';
-import { TunnelService } from './services/tunnel-service';
+import healthRoutes from './routes/health';
 import testRoutes from './routes/test';
+import { TunnelService } from './services/tunnel-service';
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-// Redis client for rate limiting
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 // Middleware
 app.use(helmet());

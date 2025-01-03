@@ -1,6 +1,5 @@
 import { rateLimit } from 'express-rate-limit';
-import { RedisStore } from 'rate-limit-redis';
-import { redis } from '@/config/redis';
+import { MemoryStore } from 'express-rate-limit';
 import { Request, Response } from 'express';
 import { logger } from '@/config/logger';
 import { createApiResponse } from '@/utils/api-response';
@@ -96,11 +95,7 @@ export const createRateLimiter = ({
     skip: (req) => {
       return req.path === '/health' || req.ip === '127.0.0.1';
     },
-    store: new RedisStore({
-      prefix: keyPrefix,
-      // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
-      sendCommand: (...args: string[]) => redis.client.call(...args),
-    }),
+    store: new MemoryStore(),
     keyGenerator,
   });
 };

@@ -1,6 +1,6 @@
 # Plugin System
 
-The LLM Crawler uses a flexible plugin system that allows you to extend its functionality with custom analysis capabilities.
+The GTM Crawler uses a flexible plugin system that allows you to extend its functionality with custom analysis capabilities.
 
 ## Overview
 

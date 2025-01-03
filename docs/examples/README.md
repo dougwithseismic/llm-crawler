@@ -1,6 +1,6 @@
-# LLM Crawler Examples
+# GTM Crawler Examples
 
-This guide provides practical examples of using the LLM Crawler for various common scenarios.
+This guide provides practical examples of using the GTM Crawler for various common scenarios.
 
 ## Basic Examples
 
@@ -328,4 +328,4 @@ app.post('/webhook', async (req, res) => {
 });
 ```
 
-These examples demonstrate common use cases and patterns for using the LLM Crawler. For more specific examples or custom implementations, please refer to the API documentation or open an issue on GitHub.
+These examples demonstrate common use cases and patterns for using the GTM Crawler. For more specific examples or custom implementations, please refer to the API documentation or open an issue on GitHub.

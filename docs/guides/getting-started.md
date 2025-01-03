@@ -1,6 +1,6 @@
-# Getting Started with LLM Crawler
+# Getting Started with GTM Crawler
 
-This guide will help you set up and start using the LLM Crawler service.
+This guide will help you set up and start using the GTM Crawler service.
 
 ## Prerequisites
 

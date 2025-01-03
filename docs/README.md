@@ -1,6 +1,6 @@
-# LLM Crawler Documentation
+# GTM Crawler Documentation
 
-Welcome to the LLM Crawler documentation! This powerful web crawling service is designed to analyze websites efficiently and provide detailed insights through a plugin-based architecture.
+Welcome to the GTM Crawler documentation! This powerful web crawling service is designed to analyze websites efficiently and provide detailed insights through a plugin-based architecture.
 
 ## Table of Contents
 

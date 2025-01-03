@@ -1,10 +1,10 @@
-# LLM Crawler Architecture
+# GTM Crawler Architecture
 
-This document provides a detailed overview of the LLM Crawler's architecture and core components.
+This document provides a detailed overview of the GTM Crawler's architecture and core components.
 
 ## System Overview
 
-The LLM Crawler is built with a modular, plugin-based architecture that separates concerns into distinct components:
+The GTM Crawler is built with a modular, plugin-based architecture that separates concerns into distinct components:
 
 ```
 ┌─────────────────┐     ┌──────────────┐     ┌─────────────┐
@@ -16,6 +16,8 @@ The LLM Crawler is built with a modular, plugin-based architecture that separate
                                             │   Plugins   │
                                             └─────────────┘
 ```
+
+![How GTM Crawler Works](../gtm-crawler-diagram.png)
 
 ## Core Components
 

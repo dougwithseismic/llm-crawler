@@ -1,6 +1,6 @@
 # Configuration Guide
 
-This guide covers all configuration options available in the LLM Crawler and provides recommendations for different use cases.
+This guide covers all configuration options available in the GTM Crawler and provides recommendations for different use cases.
 
 ## Configuration Parameters
 

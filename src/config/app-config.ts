@@ -3,7 +3,6 @@ import { logger } from './logger';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']),
-  REDIS_URL: z.string().url(),
   RATE_LIMIT: z
     .object({
       API: z.object({

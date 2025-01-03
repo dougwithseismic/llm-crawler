@@ -1,6 +1,6 @@
 # API Reference
 
-This document details the REST API endpoints provided by the LLM Crawler service.
+This document details the REST API endpoints provided by the GTM Crawler service.
 
 ## Endpoints
 

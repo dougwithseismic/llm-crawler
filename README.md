@@ -37,24 +37,9 @@ curl -X POST "http://localhost:3000/crawl/withseismic.com" \
 }'
 ```
 
-Or using HTTPie (recommended for development):
-
-```bash
-http POST localhost:3000/crawl/withseismic.com \
-  maxDepth:=3 \
-  maxPages:=100 \
-  maxRequestsPerMinute:=60 \
-  maxConcurrency:=10 \
-  timeout:='{"page": 30000, "request": 10000}' \
-  userAgent="MyBot/1.0" \
-  respectRobotsTxt:=false \
-  sitemapUrl=null \
-  webhook:='{"url": "http://localhost:3000/test/webhook"}'
-```
+Or using HTTPie / Insomnia / Postman (recommended for development - [httpie](https://httpie.io/desktop) Right click > Import > Paste in Curl)
 
 ![HTTPie Example](docs/httpie.png)
-
-HTTPie provides a more intuitive interface for API testing during development. Note the `:=` syntax for numbers and booleans, and `='...'` for JSON objects.
 
 This example shows a basic crawl of withseismic.com with common configuration options. The crawler will:
 

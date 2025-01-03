@@ -1,6 +1,18 @@
 # GTM Crawler
 
-A local-first crawler for Go To Market teams with big ambitions. Built with TypeScript, Express, and Playwright, this tool allows you to crawl websites and extract valuable data for your GTM strategy. Features include plugin-based analysis, webhook notifications, and seamless integration with Clay.com and n8n.
+A local-first crawler for Go To Market teams with big ambitions.
+
+This tool allows you to locally crawl websites and extract all the data you need for your GTM strat. The real win here is that Clay, Make, n8n etc can all interact with the tool, all whilst it runs locally on your machine.
+
+You can make http requests to your local instance just like you would any other API endpoint, and specify the webhooks you wanna fire off on successful crawling progress/completion.
+
+With the right plugins (I'll build examples), you should be able to do BASICALLY WHATEVER YOU WANT and get it into your automations.
+
+- Scrape profiles from LinkedIn
+- Grab all G2 reviews from competitors / potential prospects
+- Turn pages into Markdown and throw it through an agent etcetc.
+
+Build custom plugins to do whatever you want, set up webhook notifications, and add seamless integration with Clay.com and n8n thanks to ngrok tunnels (your machine can communicate back and forth with internet services.)
 
 ## Table of Contents
 
@@ -265,7 +277,7 @@ export class MyPlugin implements CrawlerPlugin<'myPlugin', MyMetrics, MySummary>
 }
 ```
 
-2. Register the plugin with the crawler:
+{}Register the plugin with the crawler:
 
 ```typescript
 import { MyPlugin } from './plugins/my-plugin';

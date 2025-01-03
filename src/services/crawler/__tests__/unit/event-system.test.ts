@@ -4,58 +4,62 @@ import { PlaywrightCrawler, createPlaywrightRouter } from 'crawlee';
 import { CrawlerService } from '../../crawler';
 import type { CrawlConfig, CrawlEventMap } from '../../types.improved';
 
-// Create mock crawler with spies
-const mockCrawlerRun = vi.fn().mockResolvedValue(undefined);
-const MockPlaywrightCrawler = vi.fn().mockImplementation(() => ({
-  run: mockCrawlerRun,
-}));
-
 // Mock external dependencies
-vi.mock('playwright', () => ({
-  chromium: {
-    launch: vi.fn().mockResolvedValue({
-      newPage: vi.fn().mockResolvedValue({
-        goto: vi.fn(),
-        evaluate: vi.fn().mockResolvedValue({
-          url: 'https://example.com',
-          status: 200,
-          redirectChain: [],
-          timing: {
-            start: 0,
-            domContentLoaded: 100,
-            loaded: 200,
-          },
-        }),
-        setExtraHTTPHeaders: vi.fn(),
-        context: vi.fn().mockReturnValue({
-          addInitScript: vi.fn(),
-        }),
-        close: vi.fn(),
+vi.mock('playwright', async () => {
+  const mockBrowser = {
+    newPage: vi.fn().mockResolvedValue({
+      goto: vi.fn(),
+      evaluate: vi.fn().mockResolvedValue({
+        url: 'https://example.com',
+        status: 200,
+        redirectChain: [],
+        timing: {
+          start: 0,
+          domContentLoaded: 100,
+          loaded: 200,
+        },
+      }),
+      setExtraHTTPHeaders: vi.fn(),
+      context: vi.fn().mockReturnValue({
+        addInitScript: vi.fn(),
       }),
       close: vi.fn(),
-      removeAllListeners: vi.fn(),
-      on: vi.fn(),
-      once: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      off: vi.fn(),
-      emit: vi.fn(),
-      eventNames: vi.fn(),
-      listenerCount: vi.fn(),
-      listeners: vi.fn(),
-      prependListener: vi.fn(),
-      prependOnceListener: vi.fn(),
-      rawListeners: vi.fn(),
-    } as any),
-  },
-}));
+    }),
+    close: vi.fn(),
+    removeAllListeners: vi.fn(),
+    on: vi.fn(),
+    once: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    off: vi.fn(),
+    emit: vi.fn(),
+    eventNames: vi.fn(),
+    listenerCount: vi.fn(),
+    listeners: vi.fn(),
+    prependListener: vi.fn(),
+    prependOnceListener: vi.fn(),
+    rawListeners: vi.fn(),
+  };
 
-vi.mock('crawlee', () => ({
-  PlaywrightCrawler: MockPlaywrightCrawler,
-  createPlaywrightRouter: vi.fn().mockReturnValue({
-    addDefaultHandler: vi.fn(),
-  }),
-}));
+  return {
+    chromium: {
+      launch: vi.fn().mockResolvedValue(mockBrowser),
+    },
+  };
+});
+
+vi.mock('crawlee', async () => {
+  const mockCrawler = {
+    run: vi.fn().mockResolvedValue(undefined),
+  };
+
+  return {
+    PlaywrightCrawler: vi.fn().mockImplementation(() => mockCrawler),
+    createPlaywrightRouter: vi.fn().mockReturnValue({
+      addDefaultHandler: vi.fn(),
+    }),
+  };
+});
 
 describe('Event System', () => {
   let service: CrawlerService;
@@ -138,19 +142,15 @@ describe('Event System', () => {
       const job = await service.createJob(config);
       await service.startJob(job.id);
 
-      // Verify crawler was created
-      expect(MockPlaywrightCrawler).toHaveBeenCalled();
-
-      // Get the mock instance and verify run was called
-      const mockInstance = MockPlaywrightCrawler.mock.results[0]?.value as {
-        run: typeof mockCrawlerRun;
-      };
-      expect(mockInstance.run).toHaveBeenCalled();
+      // Verify crawler was created with correct configuration
+      expect(PlaywrightCrawler).toHaveBeenCalled();
+      const mockCrawler = vi.mocked(PlaywrightCrawler).mock.results[0]?.value;
+      expect(mockCrawler.run).toHaveBeenCalledWith([config.url]);
     });
 
     it('should handle navigation errors', async () => {
       // Mock navigation error
-      vi.mocked(chromium.launch).mockResolvedValueOnce({
+      const mockBrowser = {
         newPage: vi.fn().mockResolvedValue({
           goto: vi.fn().mockRejectedValue(new Error('Navigation failed')),
           evaluate: vi.fn(),
@@ -161,20 +161,9 @@ describe('Event System', () => {
           close: vi.fn(),
         }),
         close: vi.fn(),
-        removeAllListeners: vi.fn(),
-        on: vi.fn(),
-        once: vi.fn(),
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        off: vi.fn(),
-        emit: vi.fn(),
-        eventNames: vi.fn(),
-        listenerCount: vi.fn(),
-        listeners: vi.fn(),
-        prependListener: vi.fn(),
-        prependOnceListener: vi.fn(),
-        rawListeners: vi.fn(),
-      } as any);
+      };
+
+      vi.mocked(chromium.launch).mockResolvedValueOnce(mockBrowser as any);
 
       const config: CrawlConfig = {
         url: 'https://example.com',

@@ -111,12 +111,66 @@ export class PerformancePlugin implements CrawlerPlugin<
 
 ## Using Plugins
 
-1. Create your plugin class:
+1. Create your plugin class implementing the lifecycle hooks:
 
 ```typescript
 // src/services/crawler/plugins/my-plugin.ts
 export class MyPlugin implements CrawlerPlugin<'myPlugin', MyMetrics, MySummary> {
-  // Plugin implementation
+  readonly name = 'myPlugin';
+  enabled = true;
+
+  // Called once when the crawler service initializes
+  async initialize(): Promise<void> {
+    // Set up plugin resources
+  }
+
+  // Called before the crawl job starts
+  async beforeCrawl(job: CrawlJob): Promise<void> {
+    console.log(`Starting crawl of ${job.config.url}`);
+  }
+
+  // Called before each page is loaded
+  async beforeEach(page: Page): Promise<void> {
+    // Add custom scripts or prepare page
+    await page.addScriptTag({
+      content: `window.__myPlugin = { startTime: Date.now() };`,
+    });
+  }
+
+  // Main page analysis
+  async evaluate(page: Page, loadTime: number): Promise<Record<'myPlugin', MyMetrics>> {
+    const metrics = await page.evaluate(() => ({
+      // Your page analysis logic
+    }));
+    return { myPlugin: metrics };
+  }
+
+  // Called after page analysis is complete
+  async afterEach(page: Page): Promise<void> {
+    // Clean up page modifications
+    await page.evaluate(() => {
+      delete (window as any).__myPlugin;
+    });
+  }
+
+  // Called after the crawl job completes
+  async afterCrawl(job: CrawlJob): Promise<void> {
+    console.log(`Completed crawl of ${job.config.url}`);
+  }
+
+  // Aggregate results from all pages
+  async summarize(pages: Array<Record<'myPlugin', MyMetrics>>): Promise<Record<'myPlugin', MySummary>> {
+    return {
+      myPlugin: {
+        // Your summary logic
+      }
+    };
+  }
+
+  // Called when the crawler service shuts down
+  async destroy(): Promise<void> {
+    // Clean up plugin resources
+  }
 }
 ```
 
@@ -131,6 +185,36 @@ const crawler = new CrawlerService({
   config: { debug: true },
 });
 ```
+
+### Plugin Lifecycle
+
+The plugin system provides several hooks that are called at different stages of the crawling process:
+
+1. **Initialization Phase**
+   - `initialize()`: Called once when the crawler service starts up
+
+2. **Job Level Hooks**
+   - `beforeCrawl(job)`: Called before starting to crawl a website
+   - `afterCrawl(job)`: Called after completing a website crawl
+
+3. **Page Level Hooks**
+   - `beforeEach(page)`: Called before loading each page
+   - `evaluate(page, loadTime)`: Called to analyze each page
+   - `afterEach(page)`: Called after analyzing each page
+
+4. **Results Processing**
+   - `summarize(pages)`: Called to generate final analysis
+
+5. **Cleanup**
+   - `destroy()`: Called when shutting down the crawler service
+
+All hooks except `evaluate` and `summarize` are optional. Use them to:
+
+- Set up and clean up resources
+- Add custom scripts to pages
+- Track crawling progress
+- Collect additional metrics
+- Clean up page modifications
 
 ## Built-in Plugins
 

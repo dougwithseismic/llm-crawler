@@ -1,0 +1,89 @@
+{
+  "usableSessionsCount": 1,
+  "retiredSessionsCount": 0,
+  "sessions": [
+    {
+      "id": "session_3jM7KBe3W2",
+      "cookieJar": {
+        "version": "tough-cookie@5.0.0",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "_ga",
+            "value": "GA1.2.645785007.1735911653",
+            "expires": "2026-02-07T13:40:52.630Z",
+            "domain": "withseismic.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-01-03T13:40:53.348Z",
+            "lastAccessed": "2025-01-03T13:40:56.155Z"
+          },
+          {
+            "key": "_gid",
+            "value": "GA1.2.1330543915.1735911653",
+            "expires": "2025-01-04T13:40:52.000Z",
+            "domain": "withseismic.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-01-03T13:40:53.348Z",
+            "lastAccessed": "2025-01-03T13:40:56.155Z"
+          },
+          {
+            "key": "_gat_UA-135482267-1",
+            "value": "1",
+            "expires": "2025-01-03T13:41:52.000Z",
+            "domain": "withseismic.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-01-03T13:40:53.348Z",
+            "lastAccessed": "2025-01-03T13:40:56.155Z"
+          },
+          {
+            "key": "_ga_K9NF19LLGH",
+            "value": "GS1.2.1735911652.1.0.1735911652.60.0.0",
+            "expires": "2026-02-07T13:40:52.756Z",
+            "domain": "withseismic.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-01-03T13:40:53.348Z",
+            "lastAccessed": "2025-01-03T13:40:56.155Z"
+          },
+          {
+            "key": "_reb2buid",
+            "value": "4d569dce-6ecc-456e-981f-9f8170ea96b9-1735911653329",
+            "expires": "2025-12-29T13:40:53.329Z",
+            "domain": "withseismic.com",
+            "path": "/",
+            "secure": true,
+            "hostOnly": true,
+            "creation": "2025-01-03T13:40:53.348Z",
+            "lastAccessed": "2025-01-03T13:40:56.155Z"
+          },
+          {
+            "key": "_reb2bsessionID",
+            "value": "Yp5dfW0G8hTRfWdFq0GlDcZQ",
+            "expires": "2025-01-03T14:10:53.329Z",
+            "domain": "withseismic.com",
+            "path": "/",
+            "secure": true,
+            "hostOnly": true,
+            "creation": "2025-01-03T13:40:53.348Z",
+            "lastAccessed": "2025-01-03T13:40:56.155Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2025-01-03T14:30:51.604Z",
+      "createdAt": "2025-01-03T13:40:51.604Z",
+      "usageCount": 6,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    }
+  ]
+}

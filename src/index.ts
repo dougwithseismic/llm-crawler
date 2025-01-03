@@ -1,90 +1,59 @@
-import { logger } from './config/logger';
-
-import cors from 'cors';
 import express from 'express';
+import cors from 'cors';
 import helmet from 'helmet';
-import { createServer } from 'http';
-import { config } from './config/app-config';
-import { redis } from './config/redis';
-import { errorHandler } from './middleware/error-handler';
-import { createMiddlewareChain } from './middleware/middleware-chain';
-import { apiRateLimiter, authRateLimiter } from './middleware/rate-limiter';
+import { rateLimit } from 'express-rate-limit';
+import { Redis } from 'ioredis';
 import { requestLogger } from './middleware/request-logger';
+import { errorHandler } from './middleware/error-handler';
 
-// Bull Board imports
-import { ServiceContainer } from './utils/service-container';
+// Import routes
+import healthRoutes from './routes/health';
+import authRoutes from './routes/auth';
+import apiRoutes from './routes/api';
+import crawlRoutes from './routes/crawl';
+import { logger } from './config/logger';
 import { TunnelService } from './services/tunnel-service';
+import testRoutes from './routes/test';
 
-// Initialize Express and HTTP server
 const app = express();
-const server = createServer(app);
-const container = ServiceContainer.getInstance();
+const port = process.env.PORT || 3000;
 
-// Register core services
-container.register('config', config);
-container.register('redis', redis);
+// Redis client for rate limiting
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-// Initialize tunnel service if enabled
-const tunnelService = new TunnelService();
-if (config.tunnel.enabled) {
-  tunnelService
-    .connect({
-      port: config.port || 3000,
-      authtoken: config.tunnel.authtoken,
-    })
-    .catch((err) => {
-      logger.error('Failed to establish tunnel:', err);
-    });
-}
-
-// Cleanup on server shutdown
-process.on('SIGTERM', async () => {
-  await tunnelService.disconnect();
-  // ... any other cleanup
-  process.exit(0);
-});
-
-// Setup middleware chain for protected routes
-const protectedRouteMiddleware = createMiddlewareChain(
-  apiRateLimiter,
-  // Add more middleware here...
-);
-
-// Setup middleware chain for auth routes
-const authMiddleware = createMiddlewareChain(
-  authRateLimiter,
-  // Add auth specific middleware...
-);
-
-// Setup core middleware
+// Middleware
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
-// Setup routes
-app.use('/', async (req, res) => {
-  res.send('Hello World');
-});
-app.use('/api', protectedRouteMiddleware, require('./routes/api').default);
-app.use('/auth', authMiddleware, require('./routes/auth').default);
+// Routes
+app.use('/', healthRoutes);
+app.use('/auth', authRoutes);
+app.use('/api', apiRoutes);
+app.use('/crawl', crawlRoutes);
+app.use('/test', testRoutes);
 
-// Sentry test route
-app.get('/debug-sentry', function mainHandler(req, res) {
-  throw new Error('My first Sentry error!');
-});
-
-// Error handling should be last
+// Error handling
 app.use(errorHandler);
 
-try {
-  const port = process.env.PORT || 3000;
-
-  server.listen(port, async () => {
-    logger.info(`SWARM SERVER :: 🐄🐄🐄 is running on port ${port}`);
+// Start server
+app.listen(port, async () => {
+  logger.info(`Starting server on port ${port}`);
+  const tunnelService = new TunnelService();
+  await tunnelService.connect({
+    port: Number(port),
+    authtoken: process.env.TUNNEL_AUTH_TOKEN,
   });
-} catch (error) {
-  logger.error('Failed to start server', { error });
-  process.exit(1);
-}
+  const tunnelUrl = await tunnelService.waitUntilConnected();
+  logger.info(`
+
+   WELCOME TO THE GREAT HALLS
+
+   PORT     : https://localhost://${port}
+   TUNNEL   : ${tunnelUrl}
+
+   Go forth and forge your destiny!
+   <doug@withseismic.com>
+  `);
+});

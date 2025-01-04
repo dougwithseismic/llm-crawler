@@ -11,7 +11,10 @@ const playgroundService = new PlaygroundService({
 // Create a new playground job
 router.post('/jobs', async (req, res) => {
   try {
-    const service = createServiceWithPlugins(req.body.plugins);
+    const service = new PlaygroundService({
+      plugins: req.body.plugins.map(() => new ExamplePlugin()),
+      config: { debug: process.env.NODE_ENV === 'development' },
+    });
 
     const config = {
       input: req.body.input,

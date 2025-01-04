@@ -16,7 +16,9 @@
     "helmet": "^7.1.0",
     "isolated-vm": "^5.0.1",
     "node-html-markdown": "^1.3.0",
+    "open": "^10.1.0",
     "playwright": "^1.49.1",
+    "prom-client": "^15.1.3",
     "puppeteer": "^22.15.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
@@ -35,6 +37,7 @@
     "@types/ws": "^8.x.x",
     "@vitest/coverage-v8": "^2.1.8",
     "@vitest/ui": "^2.1.8",
+    "concurrently": "^9.1.2",
     "ngrok": "5.0.0-beta.2",
     "tsx": "^4.19.2",
     "typescript": "^5.3.3",
@@ -44,12 +47,14 @@
   "private": true,
   "scripts": {
     "build": "dotenv -e .env.local -- tsc",
-    "dev": "pnpm run dev:app",
-    "dev:app": "dotenv -e .env.local -- tsx watch src/index.ts --ignore src/scripts/puppet",
-    "lint": "eslint .",
-    "plop": "plop",
-    "start": "dotenv -e .env.local -- node dist/index.js",
-    "stop-dev": "docker compose down",
+    "build:client": "cd client && pnpm install && pnpm build",
+    "build:all": "pnpm build && pnpm build:client",
+    "dev:server": "dotenv -e .env.local -- tsx watch src/index.ts",
+    "dev:client": "cd client && pnpm dev",
+    "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:client\"",
+    "start:server": "dotenv -e .env.local -- node dist/index.js",
+    "start:client": "cd client && pnpm preview --port 3000",
+    "start": "pnpm build:all && pnpm start:server",
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
@@ -58,7 +63,7 @@
   },
   "version": "1.0.0",
   "main": "src/index.ts",
-  "author": "Doug Wilson <doug@withseismic.com>",
+  "author": "Doug Silkstone <doug@withseismic.com>",
   "license": "MIT",
   "description": "A local-first crawler for Go To Market teams with big ambitions. Built with TypeScript, Express, and Playwright.",
   "repository": {
@@ -78,6 +83,5 @@
   "bugs": {
     "url": "https://github.com/dougwithseismic/gtm-crawler/issues"
   },
-  "homepage": "https://github.com/dougwithseismic/gtm-crawler#readme",
-  "type": "module"
+  "homepage": "https://github.com/dougwithseismic/gtm-crawler#readme"
 }

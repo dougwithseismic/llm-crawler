@@ -14,8 +14,8 @@ export type WebhookEventType = 'started' | 'progress' | 'completed' | 'failed';
 export interface WebhookConfig {
   url: string;
   headers?: Record<string, string>;
+  on?: ('started' | 'progress' | 'completed' | 'failed')[];
   retries?: number;
-  on?: WebhookEventType[]; // If not provided, will send all events
 }
 
 export interface CrawlConfig {
@@ -32,6 +32,7 @@ export interface CrawlConfig {
   userAgent?: string;
   respectRobotsTxt?: boolean;
   sitemapUrl?: string | null;
+  includeSitemap?: boolean;
   urlFilter?: (url: string) => boolean;
   webhook?: WebhookConfig;
 }
